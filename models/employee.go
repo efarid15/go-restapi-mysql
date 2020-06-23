@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-
 type Employee struct {
 	ID        int       `json:"id"`
 	IDNumber  string       `json:"id_number"`
