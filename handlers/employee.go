@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func Employees(w http.ResponseWriter, r *http.Request)  {
+func Employee(w http.ResponseWriter, r *http.Request)  {
 
 	if r.Method == "GET" {
 		ctx, cancel := context.WithCancel(context.Background())
