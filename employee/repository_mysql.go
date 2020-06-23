@@ -2,6 +2,7 @@ package employee
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"gorestapi/config"
 	"gorestapi/models"
@@ -12,24 +13,84 @@ import (
 )
 
 const (
-	table = "employee"
-	layout_DateTime = "2020-06-23 16:41:00"
+	table          = "employee"
+	layoutDatetime = "2006-01-02 15:04:05"
 )
 
-func GetEmployees(w http.ResponseWriter, r *http.Request)  {
+func Employees(w http.ResponseWriter, r *http.Request)  {
+
 	if r.Method == "GET" {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
 		employees, err := GetAll(ctx)
+
 		if err != nil {
 			println(err)
 		}
+		//var dataEmployee interface{} = employees
+
 		utils.ResponseJSON(w, employees, http.StatusOK)
 		return
 	}
-	http.Error(w, "Data Tidak Ditemukan", http.StatusNotFound)
+
+	if r.Method == "POST" {
+
+		if r.Header.Get("Content-Type") != "application/json" {
+			http.Error(w, "Gunakan content type application / json", http.StatusBadRequest)
+			return
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		var emp models.Employee
+
+		if err := json.NewDecoder(r.Body).Decode(&emp); err != nil {
+			utils.ResponseJSON(w, err, http.StatusBadRequest)
+			log.Fatal(err)
+			return
+		}
+
+		if err := InsertEmployee(ctx, emp); err != nil {
+			utils.ResponseJSON(w, err, http.StatusInternalServerError)
+			return
+		}
+
+		res := map[string]string{
+			"result": "Create Employee Success",
+		}
+
+		utils.ResponseJSON(w, res, http.StatusCreated)
+		return
+
+	}
+	http.Error(w, "No Permission", http.StatusMethodNotAllowed)
 	return
+
 }
+
+func InsertEmployee(ctx context.Context, employee models.Employee) error {
+	db, err := config.MYSQL()
+	if err != nil {
+		log.Fatal("Error Database Connection", err)
+	}
+
+	queryText := fmt.Sprintf("INSERT INTO %v (id_number, name, location, created_at, updated_at)" +
+									"VALUES('%v','%v','%v','%v','%v')", table,
+									employee.IDNumber,
+									employee.Name,
+									employee.Location,
+									time.Now().Format(layoutDatetime),
+									time.Now().Format(layoutDatetime))
+	_, err = db.ExecContext(ctx, queryText)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 
 func GetAll(ctx context.Context) ([]models.Employee, error) {
 	var employees []models.Employee
@@ -38,15 +99,17 @@ func GetAll(ctx context.Context) ([]models.Employee, error) {
 		log.Fatal("Koneksi database gagal", err)
 	}
 
-	queryText := fmt.Sprintf("SELECT * FROM %v ORDER BY id DESC", table)
+	queryText := fmt.Sprintf("SELECT id, id_number, name, location, created_at, updated_at FROM %v ORDER BY id DESC", table)
+
 	rowQuery, err := db.QueryContext(ctx, queryText)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for rowQuery.Next() {
+
 		var employee models.Employee
-		var createdAt, updatedAt string
+
 
 		if err = rowQuery.Scan(&employee.ID,
 			&employee.IDNumber,
@@ -54,19 +117,13 @@ func GetAll(ctx context.Context) ([]models.Employee, error) {
 			&employee.Location,
 			&employee.CreatedAt,
 			&employee.UpdatedAt); err != nil {
+			fmt.Printf("%s \n", err)
 			return nil, err
 		}
 		// change format date createdAt and updatedAt from string to datetime
-		employee.CreatedAt, err = time.Parse(layout_DateTime, createdAt)
-		if err != nil {
-			log.Fatal(err)
-		}
-		employee.UpdatedAt, err = time.Parse(layout_DateTime, updatedAt)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// end change
-		employees = append(employees, employee)
+
+        employees = append(employees, employee)
+
 	}
 
 	return employees, nil

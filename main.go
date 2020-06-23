@@ -8,7 +8,8 @@ import (
 
 func main() {
 
-	http.HandleFunc("/employees", employee.GetEmployees)
+	http.HandleFunc("/employees", employee.Employees)
+
 	println("Listen Port 8008")
 	err := http.ListenAndServe(":8008", nil)
 	if err != nil {

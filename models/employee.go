@@ -6,7 +6,7 @@ import (
 
 type Employee struct {
 	ID        int       `json:"id"`
-	IDNumber  int       `json:"id_number"`
+	IDNumber  string       `json:"id_number"`
 	Name      string    `json:"name"`
 	Location  string    `json:"location"`
 	CreatedAt time.Time `json:"created_at"`
