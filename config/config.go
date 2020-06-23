@@ -7,7 +7,6 @@ import (
 	"os"
 )
 
-
 var dsn = fmt.Sprintf("%v:%v@/%v", os.Getenv("USERNAME"),
 										  os.Getenv("PASSWORD"),
 										  os.Getenv("DATABASE"))
