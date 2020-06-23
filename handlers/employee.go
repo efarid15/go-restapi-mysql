@@ -28,7 +28,7 @@ func Employee(w http.ResponseWriter, r *http.Request)  {
 	if r.Method == "POST" {
 
 		if r.Header.Get("Content-Type") != "application/json" {
-			http.Error(w, "Gunakan content type application / json", http.StatusBadRequest)
+			http.Error(w, "Use content type application / json", http.StatusBadRequest)
 			return
 		}
 
@@ -48,11 +48,36 @@ func Employee(w http.ResponseWriter, r *http.Request)  {
 			return
 		}
 
-		res := map[string]string{
+		/*res := map[string]string{
 			"result": "Create Employee Success",
+		}*/
+
+		utils.ResponseJSON(w, emp, http.StatusCreated)
+		return
+	}
+
+	if r.Method == "PUT" {
+		if r.Header.Get("Content-Type") != "application/json" {
+			http.Error(w, "Use content type application / json", http.StatusBadRequest)
+			return
 		}
 
-		utils.ResponseJSON(w, res, http.StatusCreated)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		var emp models.Employee
+
+		if err := json.NewDecoder(r.Body).Decode(&emp); err != nil {
+			utils.ResponseJSON(w, err, http.StatusBadRequest)
+			return
+		}
+
+		if err := models.UpdateEmployee(ctx, emp); err != nil {
+			utils.ResponseJSON(w, err, http.StatusInternalServerError)
+			return
+		}
+
+		utils.ResponseJSON(w, emp, http.StatusCreated)
 		return
 	}
 
