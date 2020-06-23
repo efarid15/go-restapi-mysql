@@ -4,15 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"os"
 )
 
-const (
-	username string = "root"
-	password string = "1sampai8"
-	database string = "gorestdb"
-)
 
-var dsn = fmt.Sprintf("%v:%v@/%v", username, password, database)
+var dsn = fmt.Sprintf("%v:%v@/%v", os.Getenv("USERNAME"),
+										  os.Getenv("PASSWORD"),
+										  os.Getenv("DATABASE"))
 func MYSQL() (*sql.DB, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
