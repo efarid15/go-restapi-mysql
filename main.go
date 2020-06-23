@@ -1,14 +1,14 @@
 package main
 
 import (
-	"gorestapi/employee"
+	"gorestapi/handlers"
 	"log"
 	"net/http"
 )
 
 func main() {
 
-	http.HandleFunc("/employees", employee.Employees)
+	http.HandleFunc("/employees", handlers.Employees)
 
 	println("Listen Port 8008")
 	err := http.ListenAndServe(":8008", nil)
