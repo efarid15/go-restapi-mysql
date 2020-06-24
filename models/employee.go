@@ -28,13 +28,17 @@ func GetAll(ctx context.Context) ([]Employee, error) {
 	if err != nil {
 		log.Fatal("Error Database Connection", err)
 	}
+	defer db.Close()
+
 	queryText := fmt.Sprintf("SELECT id, id_number, name, location, created_at, updated_at FROM %v ORDER BY id DESC", table)
 
 	rowQuery, err := db.QueryContext(ctx, queryText)
-	_ = db.Close()
+
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	defer rowQuery.Close()
 
 	for rowQuery.Next() {
 		var employee Employee
@@ -59,6 +63,8 @@ func InsertEmployee(ctx context.Context, employee Employee) error {
 		log.Fatal("Error Database Connection", err)
 	}
 
+	defer db.Close()
+
 	queryText := fmt.Sprintf("INSERT INTO %v (id_number, name, location, created_at, updated_at)" +
 		"VALUES('%v','%v','%v','%v','%v')", table,
 		employee.IDNumber,
@@ -67,7 +73,7 @@ func InsertEmployee(ctx context.Context, employee Employee) error {
 		time.Now().Format(layoutDatetime),
 		time.Now().Format(layoutDatetime))
 	_, err = db.ExecContext(ctx, queryText)
-	_ = db.Close()
+
 	if err != nil {
 		return err
 	}
@@ -83,6 +89,8 @@ func UpdateEmployee(ctx context.Context, employee Employee) error {
 		log.Fatal("Can't connect to MySQL", err)
 	}
 
+	defer db.Close()
+
 	queryText := fmt.Sprintf("UPDATE %v set id_number = '%s', name ='%s', location = '%s', updated_at = '%v' where id = %d",
 		table,
 		employee.IDNumber,
@@ -93,7 +101,6 @@ func UpdateEmployee(ctx context.Context, employee Employee) error {
 	)
 
 	_, err = db.ExecContext(ctx, queryText)
-	_ = db.Close()
 
 	if err != nil {
 		return err
