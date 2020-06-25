@@ -25,6 +25,7 @@ func Employee(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
+
 	if r.Method == "POST" {
 
 		if r.Header.Get("Content-Type") != "application/json" {
