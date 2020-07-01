@@ -16,7 +16,7 @@ func ShowEmployee(w http.ResponseWriter, r *http.Request)  {
 		fields := strings.Split(r.URL.String(), "/")
 		id, err := strconv.ParseInt(fields[len(fields)-1], 10, 64)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			utils.ResponseJSON(w, err, http.StatusBadRequest)
 			return
 		}
 
@@ -26,15 +26,14 @@ func ShowEmployee(w http.ResponseWriter, r *http.Request)  {
 		employees, err := models.Show(ctx, id)
 
 		if err != nil {
-			println(err)
+			utils.ResponseJSON(w, err, http.StatusNotFound)
+			return
 		}
 
 		utils.ResponseJSON(w, employees, http.StatusOK)
 		return
 	}
 }
-
-
 
 func Employee(w http.ResponseWriter, r *http.Request)  {
 

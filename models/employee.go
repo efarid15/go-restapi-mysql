@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"gorestapi/config"
 	"log"
@@ -34,28 +35,28 @@ func Show(ctx context.Context, id int64) ([]Employee, error)  {
 	defer db.Close()
 
 	queryText := fmt.Sprintf("SELECT id, id_number, name, location, created_at, updated_at FROM %v WHERE id=%v", table, employeeId)
-
 	rowQuery, err := db.QueryContext(ctx, queryText)
-
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer rowQuery.Close()
 
 	for rowQuery.Next() {
-
-		if err = rowQuery.Scan(&employee.ID,
+		switch err := rowQuery.Scan(&employee.ID,
 			&employee.IDNumber,
 			&employee.Name,
-			&employee.Location,
+			employee.Location,
 			&employee.CreatedAt,
-			&employee.UpdatedAt); err != nil {
-			fmt.Printf("%s \n", err)
-			return nil, err
-		}
-		employees = append(employees, employee)
+			&employee.UpdatedAt); err {
+				case sql.ErrNoRows:
+					fmt.Printf("No rows returned \n", err)
+				case nil:
+					fmt.Printf("%s \n", err)
+				default:
+					employees = append(employees, employee)
+			    }
 	}
+	fmt.Printf("%s \n", queryText)
 
 	return employees, nil
 

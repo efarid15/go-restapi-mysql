@@ -12,9 +12,22 @@ func ResponseJSON(w http.ResponseWriter, payload interface{}, status int) {
 		ok = http.StatusOK
 		created = http.StatusCreated
 		internalservererror = http.StatusInternalServerError
+		notfound = http.StatusNotFound
+		badrequest = http.StatusBadRequest
 	)
 
 	switch status {
+
+		case badrequest:
+			mapdata["status"] = badrequest
+			mapdata["message"] = "request error"
+			mapdata["data"] = payload
+
+		case notfound:
+			mapdata["status"] = notfound
+			mapdata["message"] = "data not found"
+			mapdata["data"] = payload
+
 		case internalservererror:
 			mapdata["status"] = internalservererror
 			mapdata["message"] = "failed"
