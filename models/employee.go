@@ -23,7 +23,7 @@ const (
 	layoutDatetime = "2006-01-02 15:04:05"
 )
 
-func Show(ctx context.Context, id int64) ([]Employee, error)  {
+func Show(ctx context.Context, id interface{}) ([]Employee, error)  {
 	var employees []Employee
 	var employee Employee
 	var employeeId = id
@@ -42,19 +42,17 @@ func Show(ctx context.Context, id int64) ([]Employee, error)  {
 	defer rowQuery.Close()
 
 	for rowQuery.Next() {
-		switch err := rowQuery.Scan(&employee.ID,
-			&employee.IDNumber,
-			&employee.Name,
-			employee.Location,
-			&employee.CreatedAt,
-			&employee.UpdatedAt); err {
+		switch err := rowQuery.Scan(&employee.ID, &employee.IDNumber,
+							&employee.Name, &employee.Location, &employee.CreatedAt,
+							&employee.UpdatedAt); err {
 				case sql.ErrNoRows:
 					fmt.Printf("No rows returned \n", err)
 				case nil:
 					fmt.Printf("%s \n", err)
 				default:
-					employees = append(employees, employee)
+					return nil, err
 			    }
+		employees = append(employees, employee)
 	}
 	fmt.Printf("%s \n", queryText)
 

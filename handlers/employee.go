@@ -15,6 +15,7 @@ func ShowEmployee(w http.ResponseWriter, r *http.Request)  {
 	if r.Method == "GET" {
 		fields := strings.Split(r.URL.String(), "/")
 		id, err := strconv.ParseInt(fields[len(fields)-1], 10, 64)
+
 		if err != nil {
 			utils.ResponseJSON(w, err, http.StatusBadRequest)
 			return
