@@ -9,6 +9,7 @@ import (
 func main() {
 
 	http.HandleFunc("/employees", handlers.Employee)
+	http.HandleFunc(`/employee/`, handlers.ShowEmployee)
 
 	println("Listen Port 8008")
 	err := http.ListenAndServe(":8008", nil)

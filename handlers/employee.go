@@ -7,7 +7,34 @@ import (
 	"gorestapi/utils"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
+
+func ShowEmployee(w http.ResponseWriter, r *http.Request)  {
+	if r.Method == "GET" {
+		fields := strings.Split(r.URL.String(), "/")
+		id, err := strconv.ParseInt(fields[len(fields)-1], 10, 64)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		employees, err := models.Show(ctx, id)
+
+		if err != nil {
+			println(err)
+		}
+
+		utils.ResponseJSON(w, employees, http.StatusOK)
+		return
+	}
+}
+
+
 
 func Employee(w http.ResponseWriter, r *http.Request)  {
 
@@ -48,10 +75,6 @@ func Employee(w http.ResponseWriter, r *http.Request)  {
 			utils.ResponseJSON(w, err, http.StatusInternalServerError)
 			return
 		}
-
-		/*res := map[string]string{
-			"result": "Create Employee Success",
-		}*/
 
 		utils.ResponseJSON(w, emp, http.StatusCreated)
 		return

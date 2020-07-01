@@ -22,6 +22,45 @@ const (
 	layoutDatetime = "2006-01-02 15:04:05"
 )
 
+func Show(ctx context.Context, id int64) ([]Employee, error)  {
+	var employees []Employee
+	var employee Employee
+	var employeeId = id
+
+	db, err := config.MYSQL()
+	if err != nil {
+		log.Fatal("Error Database Connection", err)
+	}
+	defer db.Close()
+
+	queryText := fmt.Sprintf("SELECT id, id_number, name, location, created_at, updated_at FROM %v WHERE id=%v", table, employeeId)
+
+	rowQuery, err := db.QueryContext(ctx, queryText)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rowQuery.Close()
+
+	for rowQuery.Next() {
+
+		if err = rowQuery.Scan(&employee.ID,
+			&employee.IDNumber,
+			&employee.Name,
+			&employee.Location,
+			&employee.CreatedAt,
+			&employee.UpdatedAt); err != nil {
+			fmt.Printf("%s \n", err)
+			return nil, err
+		}
+		employees = append(employees, employee)
+	}
+
+	return employees, nil
+
+}
+
 func GetAll(ctx context.Context) ([]Employee, error) {
 	var employees []Employee
 	db, err := config.MYSQL()
